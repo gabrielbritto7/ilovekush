@@ -117,12 +117,8 @@ function App() {
       return [];
     }
   });
-  const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [privacyOpen, setPrivacyOpen] = useState(false);
-  const [initialFiles, setInitialFiles] = useState<File[]>([]);
   const [capabilities, setCapabilities] = useState<any>(null);
-  const homePicker = useRef<HTMLInputElement>(null);
-  const [dropActive, setDropActive] = useState(false);
   const tool = catalog.find((item) => path === `/ferramenta/${item.id}`);
   const navigate = (url: string) => {
     if (url !== location.pathname) history.pushState({}, "", url);
@@ -147,36 +143,13 @@ function App() {
       // Favorites remain usable for this visit when storage is unavailable.
     }
   }, [favorites]);
-  useEffect(() => {
-    document.title = tool
-      ? `${tool.name} grátis — ILOVEKUSH`
-      : "ILOVEKUSH — Ferramentas para PDF";
-  }, [tool]);
   const toggleFavorite = (id: string) =>
     setFavorites((list) =>
       list.includes(id) ? list.filter((value) => value !== id) : [...list, id],
     );
-  const showTools = () => {
-    navigate("/");
-    setTimeout(
-      () =>
-        document
-          .getElementById("ferramentas")
-          ?.scrollIntoView({ behavior: "smooth" }),
-      40,
-    );
-  };
-  const openWithFiles = (files: File[]) => {
-    if (!files.length) return;
-    setInitialFiles(files);
-    navigate(
-      `/ferramenta/${files.every((file) => file.type.startsWith("image/")) ? "jpg-pdf" : files.length > 1 ? "merge" : "edit"}`,
-    );
-  };
   const visible = catalog.filter(
     (item) =>
       (category === "todos" || item.category === category) &&
-      (!favoritesOnly || favorites.includes(item.id)) &&
       normalized(`${item.name} ${item.description}`).includes(
         normalized(query),
       ),
@@ -191,32 +164,10 @@ function App() {
         <div className="header-inner">
           <Brand
             onClick={() => {
-              setInitialFiles([]);
               navigate("/");
             }}
           />
           <nav className="header-actions" aria-label="Navegação principal">
-            <button className="tools-nav" onClick={showTools}>
-              Ferramentas
-            </button>
-            <button
-              className={`favorite-nav ${favoritesOnly ? "active" : ""}`}
-              aria-label="Meus favoritos"
-              aria-pressed={favoritesOnly}
-              title="Meus favoritos"
-              onClick={() => {
-                setFavoritesOnly((value) => !value);
-                showTools();
-              }}
-            >
-              <Icon
-                name="Bookmark"
-                size={17}
-                fill={favoritesOnly ? "currentColor" : "none"}
-              />
-              <span>Favoritos</span>
-              {favorites.length > 0 && <b>{favorites.length}</b>}
-            </button>
             <a
               className="portfolio-link"
               href="https://kush-archives.com.br/portfolio"
@@ -246,13 +197,10 @@ function App() {
           <Workspace
             key={tool.id}
             tool={tool}
-            initialFiles={initialFiles}
             onHome={() => {
-              setInitialFiles([]);
               navigate("/");
             }}
             onNavigate={(id) => {
-              setInitialFiles([]);
               navigate(`/ferramenta/${id}`);
             }}
             capabilities={capabilities}
@@ -281,51 +229,6 @@ function App() {
                   Gratuito, sem cadastro e de código aberto.
                 </p>
               </div>
-              <section
-                className="quick-upload"
-                aria-label="Envio rápido de arquivos"
-                onDragOver={(event) => {
-                  event.preventDefault();
-                  setDropActive(true);
-                }}
-                onDragLeave={(event) => {
-                  if (
-                    !event.currentTarget.contains(
-                      event.relatedTarget as Node | null,
-                    )
-                  )
-                    setDropActive(false);
-                }}
-                onDrop={(event) => {
-                  event.preventDefault();
-                  setDropActive(false);
-                  openWithFiles([...event.dataTransfer.files]);
-                }}
-                data-active={dropActive}
-              >
-                <Icon name="Upload" size={26} />
-                <div>
-                  <strong>Comece pelo arquivo</strong>
-                  <p>Arraste um PDF ou imagem aqui.</p>
-                </div>
-                <button
-                  className="primary"
-                  onClick={() => homePicker.current?.click()}
-                >
-                  Selecionar arquivos <Icon name="Plus" size={17} />
-                </button>
-                <input
-                  ref={homePicker}
-                  type="file"
-                  multiple
-                  accept=".pdf,image/*"
-                  hidden
-                  onChange={(event) => {
-                    openWithFiles([...(event.target.files || [])]);
-                    event.currentTarget.value = "";
-                  }}
-                />
-              </section>
             </section>
             <section
               id="ferramentas"
@@ -370,16 +273,8 @@ function App() {
                   </button>
                 ))}
               </div>
-              {favoritesOnly && (
-                <div className="filter-note">
-                  <Icon name="Bookmark" size={15} /> Exibindo seus favoritos{" "}
-                  <button onClick={() => setFavoritesOnly(false)}>
-                    Mostrar todas
-                  </button>
-                </div>
-              )}
               <div className="results-count" role="status" aria-live="polite">
-                {query || category !== "todos" || favoritesOnly
+                {query || category !== "todos"
                   ? `${visible.length} ${visible.length === 1 ? "ferramenta encontrada" : "ferramentas encontradas"}`
                   : "Escolha uma ferramenta para começar."}
               </div>
@@ -390,7 +285,6 @@ function App() {
                       href={`/ferramenta/${item.id}`}
                       onClick={(event) => {
                         event.preventDefault();
-                        setInitialFiles([]);
                         navigate(`/ferramenta/${item.id}`);
                       }}
                       className="tool-card-link"
@@ -425,26 +319,14 @@ function App() {
               </div>
               {!visible.length && (
                 <div className="empty-search">
-                  <Icon
-                    name={favoritesOnly ? "Bookmark" : "SearchX"}
-                    size={34}
-                  />
-                  <h3>
-                    {favoritesOnly
-                      ? "Seus favoritos ficam aqui."
-                      : "Nenhuma ferramenta encontrada."}
-                  </h3>
-                  <p>
-                    {favoritesOnly
-                      ? "Use o marcador para guardar as ferramentas que mais usa."
-                      : "Tente outra busca ou escolha outra categoria."}
-                  </p>
+                  <Icon name="SearchX" size={34} />
+                  <h3>Nenhuma ferramenta encontrada.</h3>
+                  <p>Tente outra busca ou escolha outra categoria.</p>
                   <button
                     className="outline"
                     onClick={() => {
                       setQuery("");
                       setCategory("todos");
-                      setFavoritesOnly(false);
                     }}
                   >
                     Ver todas as ferramentas
@@ -895,18 +777,16 @@ function Asset({
 
 function Workspace({
   tool,
-  initialFiles,
   onHome,
   onNavigate,
   capabilities,
 }: {
   tool: Tool;
-  initialFiles: File[];
   onHome: () => void;
   onNavigate: (id: string) => void;
   capabilities: any;
 }) {
-  const [files, setFiles] = useState<File[]>(initialFiles);
+  const [files, setFiles] = useState<File[]>([]);
   const [options, setOptions] = useState<Options>(defaultOptions);
   const [assets, setAssets] = useState<Record<string, File>>({});
   const [status, setStatus] = useState<"idle" | "running" | "done">("idle");
