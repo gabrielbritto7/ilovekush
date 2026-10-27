@@ -61,7 +61,7 @@ O modo padrão é no navegador nas ferramentas compatíveis. A escolha de proces
 | Proteger PDF | Criptografia AES-256 com senha de abertura. |
 | Desbloquear PDF | Exige senha quando necessária; não quebra criptografia nem recupera senha desconhecida. |
 | PDF/A | Conversão PDF/A-2b por Ghostscript; confira a conformidade na ferramenta de validação. |
-| Validar PDF/A | veraPDF 1.30.3 real; retorna relatório JSON de conformidade. A CLI é baixada do Maven Central com SHA-512 verificado. |
+| Validar PDF/A | veraPDF 1.30.3 real; retorna relatório JSON de conformidade. A CLI é baixada do Maven Central com SHA-512 verificado. A função tem fallback para preparar o arquivo no armazenamento temporário quando necessário. |
 | Reparar PDF | Tenta reescrever estruturas recuperáveis com qpdf/PyMuPDF; conteúdo perdido não é recriado. |
 | Digitalizar | Captura de câmera ou fotos, modos colorido/cinza/preto e branco e composição em PDF. Não detecta automaticamente as bordas da folha. |
 | OCR | Tesseract local, português/inglês/espanhol; resultado pesquisável. |

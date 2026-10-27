@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import difflib
+import hashlib
+import threading
+import urllib.request
 import html
 import io
 import json
@@ -29,6 +32,37 @@ MAX_PAGES = int(os.getenv('KUSH_MAX_PAGES', '500'))
 
 class ProcessingError(Exception):
     pass
+
+
+VALIDATOR_SHA512 = "abd403e96c26116bc0082609f3813b7cc3cd53fda068ff8abc76c8540a4d6ab638cb0ab525f04aa9c02b1406607594b18abae60848948dfb96b6ae909408ff6d"
+_validator_lock = threading.Lock()
+
+
+def validator_jar() -> Path:
+    override=os.getenv('KUSH_VERAPDF_JAR')
+    dest=Path(override) if override else ROOT/'.tools/verapdf/bin/cli-1.30.3.jar'
+    if not dest.exists() and os.getenv('VERCEL') and not override:
+        dest=Path(tempfile.gettempdir())/'ilovekush-verapdf-1.30.3.jar'
+    with _validator_lock:
+        if dest.exists():
+            if hashlib.sha512(dest.read_bytes()).hexdigest()!=VALIDATOR_SHA512:
+                raise ProcessingError('A verificação de integridade do validador PDF/A falhou.')
+            return dest
+        if not os.getenv('VERCEL') and not override:
+            raise ProcessingError('Instale o veraPDF com scripts/install-verapdf.py.')
+        url='https://repo.maven.apache.org/maven2/org/verapdf/apps/cli/1.30.3/cli-1.30.3.jar'
+        try:
+            data=urllib.request.urlopen(url,timeout=60).read(25*1024*1024)
+            if hashlib.sha512(data).hexdigest()!=VALIDATOR_SHA512:
+                raise ProcessingError('A verificação de integridade do validador PDF/A falhou.')
+            dest.parent.mkdir(parents=True,exist_ok=True)
+            fd,temporary=tempfile.mkstemp(prefix='kush-validator-',dir=dest.parent)
+            with os.fdopen(fd,'wb') as stream:stream.write(data)
+            os.replace(temporary,dest)
+        except ProcessingError:raise
+        except Exception:
+            raise ProcessingError('Não foi possível preparar o validador PDF/A. Tente novamente em alguns instantes.')
+    return dest
 
 
 def command(args: list[str], timeout: int = 180) -> subprocess.CompletedProcess:
@@ -504,7 +538,7 @@ def process(tool: str, files: list[Path], options: dict, out: Path, assets: dict
                 command(['gs','-dPDFA=2','-dBATCH','-dNOPAUSE','-dSAFER',f'--permit-file-read={icc}','-sDEVICE=pdfwrite','-sColorConversionStrategy=RGB','-dPDFACompatibilityPolicy=1',f'-sOutputFile={dest}',str(ps),str(clear)])
                 results.append(dest)
             elif tool=='validate-pdfa':
-                jar=ROOT/'.tools/verapdf/bin/cli-1.30.3.jar'
+                jar=validator_jar()
                 java=shutil.which('java')
                 if not java:
                     try:

@@ -55,7 +55,7 @@ def capabilities():
         server_tools=[t for t in server_tools if t not in ['word-pdf','excel-pdf','powerpoint-pdf','pdf-word','pdf-powerpoint','ocr','html-pdf','translate']]
     return dict(office=bool(shutil.which('soffice')),ocr=bool(shutil.which('tesseract')),
                 ghostscript=bool(shutil.which('gs')),
-                verapdf=bool((ROOT/'.tools/verapdf/bin/cli-1.30.3.jar').exists()),
+                verapdf=bool((ROOT/'.tools/verapdf/bin/cli-1.30.3.jar').exists() or os.getenv('VERCEL')),
                 translation_pairs=[p.name for p in MODEL_DIR.glob('*') if (p/'model').is_dir()] if MODEL_DIR.exists() else [],
                 max_upload_mb=MAX_MB, max_pages=500, temporary_files=True, hosted_on_vercel=bool(os.getenv('VERCEL')),server_tools=server_tools)
 
