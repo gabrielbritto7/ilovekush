@@ -4,7 +4,13 @@ Um site independente de ferramentas de PDF, em português, com React, TypeScript
 
 **O projeto ainda não equivale a 100% das funções, resultados e limites do iLovePDF.** Há 35 ferramentas no catálogo. A tradução precisa de modelos locais; assinatura visual não é assinatura certificada; conversões têm diferenças descritas abaixo. Publicar o código não torna a hospedagem ilimitada ou gratuita para sempre.
 
-A interface segue a referência visual do código público do [Kushbitmap](https://github.com/gabrielbritto7/bitmap): branco e preto, contornos simples, botões arredondados e fontes Fredoka/Quicksand hospedadas localmente. A página inicial reúne busca, categorias, favoritos e envio rápido; as opções de processamento ficam dentro de cada ferramenta. Inclui links para o portfólio Kush Archives.
+A interface segue a referência visual do código público do [Kushbitmap](https://github.com/gabrielbritto7/bitmap): branco e preto, contornos simples, botões arredondados e fontes Fredoka/Quicksand hospedadas localmente. A página inicial reúne busca, categorias e o catálogo. O envio de arquivos e as opções de processamento ficam dentro de cada ferramenta; o cabeçalho mantém apenas portfólio e GitHub. Inclui links para o portfólio Kush Archives.
+
+## Entrega em ZIP
+
+As atualizações são entregues em um ZIP com o projeto completo para publicação manual pelo proprietário. Extraia o arquivo e envie seu conteúdo para a raiz do repositório, mantendo `package.json`, `package-lock.json` e `vercel.json` nesse nível. O ZIP inclui os códigos, os recursos necessários e as configurações de build; não inclui histórico Git, credenciais, dependências instaladas, caches ou builds gerados. A instalação e o build recriam os motores e as dependências. A entrega do ZIP não publica alterações no GitHub nem na Vercel.
+
+Entrega atual: **2026-10-27-v2**. Consulte `ATUALIZACAO-v2.txt` para o passo a passo de substituição e abra `/versao.json?v=2026-10-27-v2` no site publicado para conferir qual pacote está sendo servido. O título da aba é `kush4rchives | ilovekush`, o cabeçalho contém apenas Portfólio/GitHub e o envio de arquivos fica nas ferramentas.
 
 ## Desenvolvimento
 

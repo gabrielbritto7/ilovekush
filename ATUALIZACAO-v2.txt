@@ -1,0 +1,36 @@
+ILOVEKUSH — PACOTE COMPLETO V2
+
+Esta entrega contém:
+- Título da aba: kush4rchives | ilovekush
+- Cabeçalho apenas com Portfólio e o ícone do GitHub.
+- Página inicial sem a área de selecionar/arrastar arquivos.
+- Envio de arquivos disponível dentro das ferramentas.
+
+COMO SUBSTITUIR A VERSÃO PUBLICADA
+
+1. Extraia o ZIP.
+2. Envie o conteúdo extraído para a raiz do projeto no GitHub, substituindo os
+   arquivos de mesmo nome. index.html, package.json e vercel.json ficam juntos
+   na raiz; src/main.tsx fica dentro de src; versao.json fica dentro de public.
+3. Confirme o envio em Commit changes na branch de produção do projeto.
+4. Confira se a Vercel gerou um novo deploy para o commit desse upload.
+   O botão Redeploy de um deploy antigo pode reconstruir aquele commit antigo.
+5. Depois de concluir, abra:
+   https://pdf.kush-archives.com.br/versao.json?v=2026-10-27-v2
+   O arquivo deve mostrar "versao": "2026-10-27-v2".
+6. Abra o site em uma janela anônima ou recarregue com Ctrl+F5.
+
+SE AINDA APARECER A VERSÃO ANTERIOR
+
+- No GitHub, o index.html da raiz deve ter:
+  <title>kush4rchives | ilovekush</title>
+- A pasta public deve conter o versao.json desta entrega.
+- O projeto na Vercel deve usar a pasta desses arquivos como Root Directory,
+  npm run build como Build Command e dist como Output Directory.
+- Confirme que o domínio está associado ao projeto ILOVEKUSH e que o novo
+  deploy é de Production e está Ready.
+- Se versao.json retornar 404 ou outra versão, este pacote ainda não está
+  sendo servido nesse endereço. Confira a pasta, a branch e o commit usados.
+
+Este ZIP contém o projeto completo para instalação e build. Não contém
+credenciais, histórico Git, dependências instaladas ou caches.
