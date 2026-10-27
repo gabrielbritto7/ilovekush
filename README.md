@@ -10,9 +10,11 @@ A interface segue a referência visual do código público do [Kushbitmap](https
 
 As atualizações são entregues em um ZIP com o projeto completo para publicação manual pelo proprietário. Extraia o arquivo e envie seu conteúdo para a raiz do repositório, mantendo `package.json`, `package-lock.json` e `vercel.json` nesse nível. O ZIP inclui os códigos, os recursos necessários e as configurações de build; não inclui histórico Git, credenciais, dependências instaladas, caches ou builds gerados. A instalação e o build recriam os motores e as dependências. A entrega do ZIP não publica alterações no GitHub nem na Vercel.
 
-Entrega atual: **2026-10-27-v3**. Consulte `ATUALIZACAO.txt` para o passo a passo de substituição e abra `/versao.json?v=2026-10-27-v3` no site publicado para conferir qual pacote está sendo servido. O título da aba é `kush4rchives | ilovekush`, o cabeçalho contém apenas Portfólio/GitHub e o envio de arquivos fica nas ferramentas.
+Entrega atual: **2026-10-27-v4**. Consulte `ATUALIZACAO.txt` para o passo a passo de substituição e abra `/versao.json?v=2026-10-27-v4` no site publicado para conferir qual pacote está sendo servido. O título da aba é `kush4rchives | ilovekush`, o cabeçalho contém apenas Portfólio/GitHub e o envio de arquivos fica nas ferramentas.
 
 Arraste para o upload todos os arquivos **e pastas** do ZIP extraído. Enviar apenas os arquivos soltos da raiz pode atualizar `index.html` e manter `src/main.tsx` antigo, fazendo o título mudar quando o JavaScript carrega. O build agora verifica `release-manifest.json` e lista arquivos ausentes ou diferentes antes de compilar. Para desenvolvimento, depois de uma edição intencional execute `npm run release:manifest` para atualizar os hashes; em seguida use `npm run build`. O manifesto verifica consistência da entrega, não autentica sua origem.
+
+O verificador de build não compara o hash de `vercel.json`, pois a configuração de hospedagem pode variar entre ambientes. O arquivo continua incluído no ZIP; sua sintaxe e suas opções são validadas pela plataforma de hospedagem. Essa exceção permite alterar ou reformatar a configuração sem confundir isso com uma interface desatualizada. Os fontes da interface e o arquivo público de versão continuam sendo conferidos.
 
 ## Desenvolvimento
 

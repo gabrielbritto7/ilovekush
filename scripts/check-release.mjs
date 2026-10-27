@@ -9,9 +9,10 @@ try {
   );
   const missing = [];
   const different = [];
-  // Os testes acompanham o ZIP, mas .vercelignore os exclui do pacote de build.
+  // Os testes podem ser excluídos do build. A configuração da hospedagem pode
+  // variar entre ambientes e sua validação fica a cargo da plataforma.
   const expectedFiles = Object.entries(manifest.files).filter(
-    ([file]) => !file.startsWith("tests/"),
+    ([file]) => !file.startsWith("tests/") && file !== "vercel.json",
   );
   for (const [file, expected] of expectedFiles) {
     try {
