@@ -9,10 +9,13 @@ try {
   );
   const missing = [];
   const different = [];
-  // Os testes podem ser excluídos do build. A configuração da hospedagem pode
-  // variar entre ambientes e sua validação fica a cargo da plataforma.
+  // Diagnóstico manual da interface; este script não participa de npm run build.
+  // Documentação, testes e configuração de hospedagem não definem sua versão.
   const expectedFiles = Object.entries(manifest.files).filter(
-    ([file]) => !file.startsWith("tests/") && file !== "vercel.json",
+    ([file]) =>
+      file === "index.html" ||
+      file.startsWith("src/") ||
+      file === "public/versao.json",
   );
   for (const [file, expected] of expectedFiles) {
     try {
@@ -39,15 +42,15 @@ try {
           different.map((file) => `  ${file}`).join("\n"),
       );
     console.error(
-      "Extraia o ZIP completo e envie também as pastas src, public, scripts, api, backend, assets, server e tests, preservando os caminhos.",
+      "Confira index.html, a pasta src e public/versao.json da mesma entrega, preservando os caminhos.",
     );
     console.error(
-      "Se você editou os fontes intencionalmente, gere o manifesto com npm run release:manifest antes do build.\n",
+      "Se você editou os fontes intencionalmente, gere o manifesto com npm run release:manifest antes de repetir este diagnóstico manual.\n",
     );
     process.exitCode = 1;
   } else {
     console.log(
-      `Pacote da aplicação verificado: ${manifest.versao} (${expectedFiles.length} arquivos).`,
+      `Diagnóstico manual da interface: ${manifest.versao} (${expectedFiles.length} arquivos conferidos).`,
     );
   }
 } catch (error) {

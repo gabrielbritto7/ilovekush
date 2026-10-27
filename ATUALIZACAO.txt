@@ -1,0 +1,32 @@
+ILOVEKUSH — PACOTE COMPLETO V5
+
+CORREÇÃO DESTA ENTREGA
+
+A conferência de hashes foi retirada do build automático. A ausência deste
+arquivo de instruções ou de outros arquivos de diagnóstico não impede a
+compilação. npm run build prepara os motores, confere o TypeScript e gera dist.
+
+ATUALIZAÇÃO PELO GITHUB DESKTOP
+
+1. Abra Repository > Show in Explorer no GitHub Desktop.
+2. Extraia este ZIP e copie TODO O CONTEÚDO da pasta extraída para dentro da
+   pasta clonada, substituindo os arquivos existentes. package.json fica na
+   raiz, ao lado das pastas src, public e scripts.
+3. Faça Commit to main e depois Push origin no GitHub Desktop.
+4. Aguarde o novo deploy ficar Ready na Vercel.
+5. Abra:
+   https://pdf.kush-archives.com.br/versao.json?v=2026-10-27-v5
+   Deve aparecer "versao": "2026-10-27-v5".
+6. Abra o site. O título deve permanecer "kush4rchives | ilovekush" após
+   carregar. O cabeçalho contém apenas Portfólio/GitHub e o envio de arquivos
+   fica dentro das ferramentas.
+
+CONFERÊNCIA OPCIONAL PARA DESENVOLVIMENTO
+
+npm run release:check confere os arquivos da interface manualmente.
+npm run release:manifest renova o manifesto após edições intencionais.
+Esses comandos não fazem parte de npm run build e não são necessários para
+publicar. O manifesto não recupera arquivos ausentes e não autentica a origem.
+
+O ZIP contém o projeto completo, sem credenciais, histórico Git, dependências
+instaladas, caches ou builds gerados. A instalação e o build recriam os motores.

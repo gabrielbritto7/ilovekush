@@ -10,11 +10,13 @@ A interface segue a referência visual do código público do [Kushbitmap](https
 
 As atualizações são entregues em um ZIP com o projeto completo para publicação manual pelo proprietário. Extraia o arquivo e envie seu conteúdo para a raiz do repositório, mantendo `package.json`, `package-lock.json` e `vercel.json` nesse nível. O ZIP inclui os códigos, os recursos necessários e as configurações de build; não inclui histórico Git, credenciais, dependências instaladas, caches ou builds gerados. A instalação e o build recriam os motores e as dependências. A entrega do ZIP não publica alterações no GitHub nem na Vercel.
 
-Entrega atual: **2026-10-27-v4**. Consulte `ATUALIZACAO.txt` para o passo a passo de substituição e abra `/versao.json?v=2026-10-27-v4` no site publicado para conferir qual pacote está sendo servido. O título da aba é `kush4rchives | ilovekush`, o cabeçalho contém apenas Portfólio/GitHub e o envio de arquivos fica nas ferramentas.
+Entrega atual: **2026-10-27-v5**. Consulte `ATUALIZACAO.txt` para substituir a versão pelo GitHub Desktop e abra `/versao.json?v=2026-10-27-v5` no site publicado para conferir qual pacote está sendo servido. O título da aba é `kush4rchives | ilovekush`, o cabeçalho contém apenas Portfólio/GitHub e o envio de arquivos fica nas ferramentas.
 
-Arraste para o upload todos os arquivos **e pastas** do ZIP extraído. Enviar apenas os arquivos soltos da raiz pode atualizar `index.html` e manter `src/main.tsx` antigo, fazendo o título mudar quando o JavaScript carrega. O build agora verifica `release-manifest.json` e lista arquivos ausentes ou diferentes antes de compilar. Para desenvolvimento, depois de uma edição intencional execute `npm run release:manifest` para atualizar os hashes; em seguida use `npm run build`. O manifesto verifica consistência da entrega, não autentica sua origem.
+Copie os arquivos **e pastas** do ZIP extraído para a pasta clonada. Enviar apenas os arquivos soltos da raiz pode atualizar `index.html` e manter `src/main.tsx` antigo, fazendo o título mudar quando o JavaScript carrega.
 
-O verificador de build não compara o hash de `vercel.json`, pois a configuração de hospedagem pode variar entre ambientes. O arquivo continua incluído no ZIP; sua sintaxe e suas opções são validadas pela plataforma de hospedagem. Essa exceção permite alterar ou reformatar a configuração sem confundir isso com uma interface desatualizada. Os fontes da interface e o arquivo público de versão continuam sendo conferidos.
+O comando `npm run build` prepara os motores, verifica o TypeScript e compila com Vite. A conferência de hashes foi removida do build automático: documentação, manifestos de entrega e scripts de diagnóstico não são requisitos de publicação. A ausência de `ATUALIZACAO.txt` não impede o build.
+
+O diagnóstico de consistência da interface pode ser executado manualmente com `npm run release:check`. Ele confere apenas `index.html`, `src/` e `public/versao.json`; documentação, testes e configuração de hospedagem ficam fora desse diagnóstico. Para renovar o manifesto após edições intencionais, use `npm run release:manifest`. Esses comandos são opcionais e não são executados pela publicação. O manifesto descreve os arquivos da entrega e não autentica sua origem.
 
 ## Desenvolvimento
 
