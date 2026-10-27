@@ -75,6 +75,7 @@ import {
   Upload,
   Workflow,
   Wrench,
+  X,
   Zap,
 } from "lucide-react";
 export const Icons = {
@@ -154,5 +155,6 @@ export const Icons = {
   Upload,
   Workflow,
   Wrench,
+  X,
   Zap,
 };

@@ -15,8 +15,8 @@
     "office": "node scripts/office-server.mjs"
   },
   "dependencies": {
-    "@fontsource/dm-sans": "^5.3.0",
-    "@fontsource/instrument-serif": "^5.3.0",
+    "@fontsource/fredoka": "^5.3.0",
+    "@fontsource/quicksand": "^5.3.0",
     "@jspawn/ghostscript-wasm": "^0.0.2",
     "@jspawn/qpdf-wasm": "^0.0.2",
     "@matbee/libreoffice-converter": "2.7.2",

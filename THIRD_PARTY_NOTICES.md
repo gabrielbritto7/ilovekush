@@ -6,7 +6,7 @@ O ILOVEKUSH é independente do iLovePDF. As interfaces dos SDKs oficiais foram e
 | --- | --- | --- |
 | React, Vite, TypeScript | Interface e build | MIT |
 | Lucide | Ícones | ISC |
-| DM Sans, Instrument Serif | Fontes da interface, hospedadas localmente | SIL OFL-1.1 |
+| Fredoka, Quicksand | Fontes da interface, hospedadas localmente | SIL OFL-1.1 |
 | pdf-lib, fontkit | Manipulação e composição PDF no navegador | MIT |
 | PDF.js | Leitura, extração e prévias | Apache-2.0 |
 | qpdf / @jspawn/qpdf-wasm | Criptografia e reescrita estrutural | Apache-2.0; consulte avisos do pacote e upstream |

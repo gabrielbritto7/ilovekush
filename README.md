@@ -4,6 +4,8 @@ Um site independente de ferramentas de PDF, em português, com React, TypeScript
 
 **O projeto ainda não equivale a 100% das funções, resultados e limites do iLovePDF.** Há 35 ferramentas no catálogo. A tradução precisa de modelos locais; assinatura visual não é assinatura certificada; conversões têm diferenças descritas abaixo. Publicar o código não torna a hospedagem ilimitada ou gratuita para sempre.
 
+A interface segue a referência visual do código público do [Kushbitmap](https://github.com/gabrielbritto7/bitmap): branco e preto, contornos simples, botões arredondados e fontes Fredoka/Quicksand hospedadas localmente. A página inicial reúne busca, categorias, favoritos e envio rápido; as opções de processamento ficam dentro de cada ferramenta. Inclui links para o portfólio Kush Archives.
+
 ## Desenvolvimento
 
 Requisitos: Linux x64 para o backend completo; Node.js 22+; Python 3.12+; `curl`. O frontend funciona em navegadores modernos. Os motores WebAssembly locais de PDF e OCR exigem um navegador moderno; os headers COOP/COEP já estão configurados no Vite e na Vercel.
@@ -111,7 +113,7 @@ O domínio solicitado é **`pdf.kush-archives.com.br`**. Após publicar, adicion
 
 ### Credenciais
 
-Configure `VERCEL_TOKEN` pelo campo seguro do ambiente. Não coloque tokens no código, em arquivos versionados, em argumentos visíveis de logs ou no chat. O GitHub deve usar a autenticação de plataforma existente. A publicação de repositório público exige acesso de escrita e confirmação de visibilidade no GitHub.
+Para permitir que o agente gerencie a Vercel, configure `VERCEL_TOKEN` pelo campo seguro do **ambiente do Codex**, com destino `api.vercel.com`. As variáveis do projeto na Vercel são um ambiente separado: adicionar o token ali não o disponibiliza ao Codex, e o site não precisa desse token para funcionar. Depois de conectar o repositório, os pushes podem acionar a integração Git da Vercel sem um token no site. Não coloque tokens no código, em arquivos versionados, em argumentos visíveis de logs ou no chat. O GitHub deve usar a autenticação de plataforma existente. A publicação de repositório público exige acesso de escrita e confirmação de visibilidade no GitHub.
 
 ## Testes
 

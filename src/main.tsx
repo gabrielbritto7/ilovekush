@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { Icons } from "./icons";
-import "@fontsource/dm-sans/400.css";
-import "@fontsource/dm-sans/500.css";
-import "@fontsource/dm-sans/600.css";
-import "@fontsource/dm-sans/700.css";
-import "@fontsource/instrument-serif/400-italic.css";
+import "@fontsource/quicksand/500.css";
+import "@fontsource/quicksand/600.css";
+import "@fontsource/quicksand/700.css";
+import "@fontsource/fredoka/400.css";
+import "@fontsource/fredoka/500.css";
+import "@fontsource/fredoka/600.css";
 import catalog from "./tools.json";
 import type { Options, Output } from "./engine";
 const localTools = new Set(
@@ -64,7 +65,7 @@ const defaultOptions = (): Options => ({
   group_size: 1,
   angle: 90,
   font_size: 18,
-  color: "#204e3e",
+  color: "#1a1a1a",
   opacity: 30,
   start: 1,
   position: "bottom",
@@ -90,20 +91,14 @@ function Brand({ onClick }: { onClick: () => void }) {
   return (
     <a
       href="/"
-      onClick={(e) => {
-        e.preventDefault();
+      onClick={(event) => {
+        event.preventDefault();
         onClick();
       }}
       className="brand"
       aria-label="ILOVEKUSH início"
     >
-      <span className="brand-icon">
-        <Icon name="Leaf" size={23} />
-      </span>
-      <span>
-        ILOVE<span className="brand-green">KUSH</span>
-        <span className="brand-dot">.</span>
-      </span>
+      ILOVEKUSH<span className="brand-label">PDF</span>
     </a>
   );
 }
@@ -114,24 +109,24 @@ function App() {
   const [category, setCategory] = useState("todos");
   const [favorites, setFavorites] = useState<string[]>(() => {
     try {
-      return JSON.parse(localStorage.getItem("kush-favorites") || "[]");
+      const saved = JSON.parse(localStorage.getItem("kush-favorites") || "[]");
+      return Array.isArray(saved)
+        ? saved.filter((id) => typeof id === "string")
+        : [];
     } catch {
       return [];
     }
   });
   const [favoritesOnly, setFavoritesOnly] = useState(false);
-  const [modal, setModal] = useState("");
+  const [privacyOpen, setPrivacyOpen] = useState(false);
   const [initialFiles, setInitialFiles] = useState<File[]>([]);
-  const [mobileNav, setMobileNav] = useState(false);
   const [capabilities, setCapabilities] = useState<any>(null);
   const homePicker = useRef<HTMLInputElement>(null);
   const [dropActive, setDropActive] = useState(false);
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const tool = catalog.find((t) => path === `/ferramenta/${t.id}`);
+  const tool = catalog.find((item) => path === `/ferramenta/${item.id}`);
   const navigate = (url: string) => {
     if (url !== location.pathname) history.pushState({}, "", url);
     setPath(url);
-    setMobileNav(false);
     window.scrollTo({ top: 0, behavior: "instant" });
   };
   useEffect(() => {
@@ -141,26 +136,33 @@ function App() {
   }, []);
   useEffect(() => {
     fetch("/api/health")
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((response) => (response.ok ? response.json() : Promise.reject()))
       .then((data) => setCapabilities(data.capabilities))
       .catch(() => setCapabilities({ unavailable: true }));
   }, []);
   useEffect(() => {
-    localStorage.setItem("kush-favorites", JSON.stringify(favorites));
+    try {
+      localStorage.setItem("kush-favorites", JSON.stringify(favorites));
+    } catch {
+      // Favorites remain usable for this visit when storage is unavailable.
+    }
   }, [favorites]);
   useEffect(() => {
     document.title = tool
       ? `${tool.name} grátis — ILOVEKUSH`
-      : "ILOVEKUSH — Seu PDF, do seu jeito.";
+      : "ILOVEKUSH — Ferramentas para PDF";
   }, [tool]);
   const toggleFavorite = (id: string) =>
     setFavorites((list) =>
-      list.includes(id) ? list.filter((x) => x !== id) : [...list, id],
+      list.includes(id) ? list.filter((value) => value !== id) : [...list, id],
     );
-  const scrollTo = (id: string) => {
+  const showTools = () => {
     navigate("/");
     setTimeout(
-      () => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }),
+      () =>
+        document
+          .getElementById("ferramentas")
+          ?.scrollIntoView({ behavior: "smooth" }),
       40,
     );
   };
@@ -168,27 +170,23 @@ function App() {
     if (!files.length) return;
     setInitialFiles(files);
     navigate(
-      `/ferramenta/${files.every((f) => f.type.startsWith("image/")) ? "jpg-pdf" : files.length > 1 ? "merge" : "edit"}`,
+      `/ferramenta/${files.every((file) => file.type.startsWith("image/")) ? "jpg-pdf" : files.length > 1 ? "merge" : "edit"}`,
     );
   };
   const visible = catalog.filter(
-    (t) =>
-      (category === "todos" || t.category === category) &&
-      (!favoritesOnly || favorites.includes(t.id)) &&
-      normalized(`${t.name} ${t.description}`).includes(normalized(query)),
+    (item) =>
+      (category === "todos" || item.category === category) &&
+      (!favoritesOnly || favorites.includes(item.id)) &&
+      normalized(`${item.name} ${item.description}`).includes(
+        normalized(query),
+      ),
   );
 
   return (
     <>
-      {!tool && (
-        <div className="announcement">
-          <span className="announcement-dot" /> Um pouco mais leve. Um PDF de
-          cada vez.{" "}
-          <span className="announcement-label">
-            LIVRE PARA CRIAR <Icon name="ArrowUpRight" size={13} />
-          </span>
-        </div>
-      )}
+      <a className="skip-link" href="#conteudo">
+        Pular para o conteúdo
+      </a>
       <header className="header">
         <div className="header-inner">
           <Brand
@@ -197,569 +195,337 @@ function App() {
               navigate("/");
             }}
           />
-          <nav className={mobileNav ? "nav open" : "nav"}>
-            <button
-              className={!tool ? "nav-active" : ""}
-              onClick={() => scrollTo("ferramentas")}
-            >
-              Ferramentas PDF <Icon name="ChevronDown" size={14} />
+          <nav className="header-actions" aria-label="Navegação principal">
+            <button className="tools-nav" onClick={showTools}>
+              Ferramentas
             </button>
-            <button onClick={() => scrollTo("como-funciona")}>
-              Como funciona
-            </button>
-            <button onClick={() => setModal("about")}>Sobre o projeto</button>
-          </nav>
-          <div className="header-actions">
             <button
               className={`favorite-nav ${favoritesOnly ? "active" : ""}`}
+              aria-label="Meus favoritos"
+              aria-pressed={favoritesOnly}
+              title="Meus favoritos"
               onClick={() => {
-                setFavoritesOnly((v) => !v);
-                scrollTo("ferramentas");
+                setFavoritesOnly((value) => !value);
+                showTools();
               }}
             >
-              <Icon name="Bookmark" size={17} /> <span>Meus favoritos</span>
+              <Icon
+                name="Bookmark"
+                size={17}
+                fill={favoritesOnly ? "currentColor" : "none"}
+              />
+              <span>Favoritos</span>
               {favorites.length > 0 && <b>{favorites.length}</b>}
             </button>
+            <a
+              className="portfolio-link"
+              href="https://kush-archives.com.br/portfolio"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Abrir portfólio Kush Archives"
+              title="Portfólio Kush Archives"
+            >
+              <span>Portfólio</span>
+              <Icon name="ArrowUpRight" size={17} />
+            </a>
             <a
               className="github-header"
               href="https://github.com/gabrielbritto7/ilovekush"
               target="_blank"
               rel="noreferrer"
               aria-label="Código no GitHub"
+              title="Código no GitHub"
             >
-              <Icon name="Github" size={19} />
+              <Icon name="Github" size={20} />
             </a>
-            <button
-              className="mobile-menu"
-              onClick={() => setMobileNav((v) => !v)}
-              aria-label="Abrir menu"
-            >
-              <Icon name={mobileNav ? "X" : "Menu"} />
-            </button>
-          </div>
+          </nav>
         </div>
       </header>
-      {tool ? (
-        <Workspace
-          key={tool.id}
-          tool={tool}
-          initialFiles={initialFiles}
-          onHome={() => {
-            setInitialFiles([]);
-            navigate("/");
-          }}
-          onNavigate={(id) => {
-            setInitialFiles([]);
-            navigate(`/ferramenta/${id}`);
-          }}
-          capabilities={capabilities}
-        />
-      ) : path !== "/" ? (
-        <main className="not-found">
-          <Icon name="FileQuestion" size={60} />
-          <h1>Essa página não está por aqui.</h1>
-          <button className="primary" onClick={() => navigate("/")}>
-            Voltar para o início
-          </button>
-        </main>
-      ) : (
-        <main>
-          <section className="hero container">
-            <div className="hero-copy">
-              <div className="eyebrow">
-                <span className="tiny-leaf">
-                  <Icon name="Sprout" size={14} />
-                </span>{" "}
-                UM NOVO JEITO DE CUIDAR DOS SEUS ARQUIVOS
-              </div>
-              <h1>
-                Seu PDF,
-                <br />
-                do seu <em>jeito.</em>
-                <span className="hero-asterisk">✳</span>
-              </h1>
-              <p>
-                Tudo o que você precisa para transformar seus PDFs.
-                <br className="desktop-break" /> Simples, gratuito e sem
-                complicação.
-              </p>
-              <button
-                className="primary hero-cta"
-                onClick={() => scrollTo("ferramentas")}
-              >
-                Encontre sua ferramenta <Icon name="ArrowRight" size={18} />
-              </button>
-              <div className="hero-promises">
-                <span>
-                  <Icon name="Check" size={14} /> Sem assinatura
-                </span>
-                <span>
-                  <Icon name="Check" size={14} /> Sem cadastro
-                </span>
-                <span>
-                  <Icon name="Check" size={14} /> Código aberto
-                </span>
-              </div>
-            </div>
-            <div
-              className="hero-art"
-              aria-label="Ilustração de documentos organizados"
-            >
-              <div className="art-orbit orbit-one" />
-              <div className="art-orbit orbit-two" />
-              <div className="art-dots">
-                <span />
-                <span />
-                <span />
-                <span />
-              </div>
-              <div className="floating-tag tag-private">
-                <span>
-                  <Icon name="ShieldCheck" size={20} />
-                </span>
-                <div>
-                  Seus arquivos.<small>Suas escolhas.</small>
-                </div>
-                <Icon name="Check" size={16} />
-              </div>
-              <div className="art-document doc-back">
-                <div className="doc-header">
-                  <i /> <span>menos trabalho</span>
-                </div>
-                <div className="doc-lines">
-                  <b />
-                  <b />
-                  <b />
-                  <b />
-                </div>
-              </div>
-              <div className="art-document doc-front">
-                <div className="pdf-file-icon">
-                  <Icon name="FileText" size={34} />
-                  <span>PDF</span>
-                </div>
-                <div className="document-title">Mais possibilidades.</div>
-                <div className="doc-lines">
-                  <b />
-                  <b />
-                  <b />
-                </div>
-                <div className="document-chart">
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                  <span>
-                    <Icon name="TrendingUp" size={30} />
-                  </span>
-                </div>
-                <div className="document-footer">
-                  <span className="mini-leaf">
-                    <Icon name="Leaf" size={13} />
-                  </span>{" "}
-                  feito do seu jeito <Icon name="CheckCheck" size={15} />
-                </div>
-              </div>
-              <div className="floating-tag tag-convert">
-                <span className="mini-file">JPG</span>
-                <Icon name="ArrowRight" size={18} />
-                <span className="mini-file pdf">PDF</span>
-                <b>Prontinho!</b>
-              </div>
-              <div className="art-spark spark-one">✳</div>
-              <div className="art-spark spark-two">✦</div>
-              <div className="art-caption">
-                <span /> MENOS CLIQUES. MAIS FLUXO.
-              </div>
-            </div>
-          </section>
-          <section
-            className="quick-upload container"
-            onDragOver={(e) => {
-              e.preventDefault();
-              setDropActive(true);
+      <div id="conteudo" tabIndex={-1}>
+        {tool ? (
+          <Workspace
+            key={tool.id}
+            tool={tool}
+            initialFiles={initialFiles}
+            onHome={() => {
+              setInitialFiles([]);
+              navigate("/");
             }}
-            onDragLeave={() => setDropActive(false)}
-            onDrop={(e) => {
-              e.preventDefault();
-              setDropActive(false);
-              openWithFiles([...e.dataTransfer.files]);
+            onNavigate={(id) => {
+              setInitialFiles([]);
+              navigate(`/ferramenta/${id}`);
             }}
-            data-active={dropActive}
-          >
-            <div className="upload-symbol">
-              <Icon name="CloudUpload" size={27} />
-            </div>
-            <div>
-              <strong>Já está com o arquivo em mãos?</strong>
-              <p>Arraste seus arquivos aqui e vamos começar.</p>
-            </div>
-            <button
-              className="outline"
-              onClick={() => homePicker.current?.click()}
-            >
-              Selecionar arquivos <Icon name="Plus" size={17} />
+            capabilities={capabilities}
+          />
+        ) : path !== "/" ? (
+          <main className="not-found container">
+            <Icon name="FileQuestion" size={48} />
+            <h1>Essa página não está por aqui.</h1>
+            <button className="primary" onClick={() => navigate("/")}>
+              Voltar para o início
             </button>
-            <input
-              ref={homePicker}
-              type="file"
-              multiple
-              accept=".pdf,image/*"
-              hidden
-              onChange={(e) => openWithFiles([...(e.target.files || [])])}
-            />
-            <span className="quick-upload-hint">PDF, JPG, PNG e mais</span>
-          </section>
-          <section id="ferramentas" className="tools-section container">
-            <div className="section-heading">
-              <div>
-                <div className="section-kicker">
-                  UMA CAIXA DE FERRAMENTAS. MUITAS POSSIBILIDADES.
-                </div>
-                <h2>
-                  O que vamos fazer <em>hoje?</em>
-                </h2>
-              </div>
-              <label className="search-box">
-                <Icon name="Search" size={19} />
-                <input
-                  aria-label="Buscar ferramenta"
-                  placeholder="Busque uma ferramenta…"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                />
-                {query && (
-                  <button
-                    onClick={() => setQuery("")}
-                    aria-label="Limpar busca"
-                  >
-                    <Icon name="X" size={15} />
-                  </button>
-                )}
-                <kbd>⌕</kbd>
-              </label>
-            </div>
-            <div className="category-bar" role="group" aria-label="Categorias">
-              {categories.map(([id, name, icon]) => (
-                <button
-                  key={id}
-                  className={category === id ? "selected" : ""}
-                  onClick={() => setCategory(id)}
-                >
-                  <Icon name={icon} size={16} />
-                  {name}
-                  {id === "todos" && <span>{catalog.length}</span>}
-                </button>
-              ))}
-            </div>
-            {favoritesOnly && (
-              <div className="filter-note">
-                <Icon name="Bookmark" size={15} /> Exibindo seus favoritos{" "}
-                <button onClick={() => setFavoritesOnly(false)}>
-                  Mostrar todas
-                </button>
-              </div>
-            )}
-            <div className="tools-grid">
-              {visible.map((t) => (
-                <article className={`tool-card color-${t.color}`} key={t.id}>
-                  <a
-                    href={`/ferramenta/${t.id}`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setInitialFiles([]);
-                      navigate(`/ferramenta/${t.id}`);
-                    }}
-                    className="tool-card-link"
-                  >
-                    <span className="tool-icon">
-                      <Icon name={t.icon} size={27} />
-                    </span>
-                    <h3>
-                      {t.name}
-                      <Icon name="ArrowUpRight" size={17} />
-                    </h3>
-                    <p>{t.description}</p>
-                    <span className="card-bottom">
-                      {t.featured ? (
-                        <>
-                          <span className="popular-dot" /> Entre as favoritas
-                        </>
-                      ) : (
-                        <>
-                          <Icon name="ArrowRight" size={13} /> Vamos lá
-                        </>
-                      )}
-                    </span>
-                  </a>
-                  <button
-                    className={`bookmark ${favorites.includes(t.id) ? "bookmarked" : ""}`}
-                    aria-label={`${favorites.includes(t.id) ? "Remover" : "Adicionar"} ${t.name} ${favorites.includes(t.id) ? "dos" : "aos"} favoritos`}
-                    onClick={() => toggleFavorite(t.id)}
-                  >
-                    <Icon
-                      name="Bookmark"
-                      size={17}
-                      fill={favorites.includes(t.id) ? "currentColor" : "none"}
-                    />
-                  </button>
-                </article>
-              ))}
-            </div>
-            {!visible.length && (
-              <div className="empty-search">
-                <Icon name={favoritesOnly ? "Bookmark" : "SearchX"} size={40} />
-                <h3>
-                  {favoritesOnly
-                    ? "Suas favoritas ficam aqui."
-                    : "Nenhuma ferramenta por aqui."}
-                </h3>
+          </main>
+        ) : (
+          <main className="home container">
+            <section className="intro" aria-labelledby="intro-title">
+              <div className="intro-copy">
+                <span className="section-kicker">UM PROJETO KUSH ARCHIVES</span>
+                <h1 id="intro-title">
+                  Seus PDFs.
+                  <br />
+                  Sem complicação.
+                </h1>
                 <p>
-                  {favoritesOnly
-                    ? "Toque no marcador de uma ferramenta para encontrá-la mais rápido."
-                    : "Tente outra busca ou escolha uma categoria diferente."}
+                  Junte, converta, edite e resolva.
+                  <br />
+                  Gratuito, sem cadastro e de código aberto.
                 </p>
-                <button
-                  className="outline"
-                  onClick={() => {
-                    setQuery("");
-                    setCategory("todos");
-                    setFavoritesOnly(false);
-                  }}
-                >
-                  Ver todas as ferramentas
-                </button>
               </div>
-            )}
-          </section>
-          <section className="values container">
-            <div className="value-intro">
-              <span className="section-kicker">FEITO PARA FACILITAR</span>
-              <h2>
-                Menos obstáculos.
-                <br />
-                <em>Mais liberdade.</em>
-              </h2>
-              <p>
-                Ferramentas que respeitam seu tempo.
-                <br />E o seu bolso também.
-              </p>
-              <span className="value-flower">✳</span>
-            </div>
-            <div className="value-item">
-              <span>
-                <Icon name="Gift" size={25} />
-              </span>
-              <h3>Gratuito, de verdade.</h3>
-              <p>
-                Sem planos premium ou cobrança por operação. Todas as
-                ferramentas têm acesso livre.
-              </p>
-            </div>
-            <div className="value-item">
-              <span>
-                <Icon name="ShieldCheck" size={25} />
-              </span>
-              <h3>Privacidade faz parte.</h3>
-              <p>
-                Várias ferramentas funcionam no seu dispositivo. Quando o
-                servidor é usado, os arquivos são temporários.
-              </p>
-            </div>
-            <div className="value-item">
-              <span>
-                <Icon name="Code2" size={25} />
-              </span>
-              <h3>Aberto a possibilidades.</h3>
-              <p>
-                Um projeto de código aberto, com motores próprios e
-                independência de APIs pagas.
-              </p>
-            </div>
-          </section>
-          <section id="como-funciona" className="how-section container">
-            <div className="section-kicker">DO ARQUIVO AO PRONTINHO</div>
-            <h2>
-              Complicado? <em>Não por aqui.</em>
-            </h2>
-            <div className="steps">
-              {[
-                [
-                  "01",
-                  "Escolha sua ferramenta",
-                  "Encontre o que precisa no nosso catálogo.",
-                ],
-                [
-                  "02",
-                  "Adicione seus arquivos",
-                  "Selecione, arraste ou tire uma foto.",
-                ],
-                [
-                  "03",
-                  "Deixe do seu jeito",
-                  "Ajuste as opções e baixe o resultado.",
-                ],
-              ].map(([n, title, desc]) => (
-                <div key={n}>
-                  <span className="step-number">{n}</span>
-                  <div>
-                    <h3>{title}</h3>
-                    <p>{desc}</p>
-                  </div>
-                  <Icon name="ArrowRight" size={22} />
+              <section
+                className="quick-upload"
+                aria-label="Envio rápido de arquivos"
+                onDragOver={(event) => {
+                  event.preventDefault();
+                  setDropActive(true);
+                }}
+                onDragLeave={(event) => {
+                  if (
+                    !event.currentTarget.contains(
+                      event.relatedTarget as Node | null,
+                    )
+                  )
+                    setDropActive(false);
+                }}
+                onDrop={(event) => {
+                  event.preventDefault();
+                  setDropActive(false);
+                  openWithFiles([...event.dataTransfer.files]);
+                }}
+                data-active={dropActive}
+              >
+                <Icon name="Upload" size={26} />
+                <div>
+                  <strong>Comece pelo arquivo</strong>
+                  <p>Arraste um PDF ou imagem aqui.</p>
                 </div>
-              ))}
-            </div>
-          </section>
-          <section className="faq container">
-            <div>
-              <span className="section-kicker">BOM SABER</span>
-              <h2>
-                Antes de
-                <br />
-                <em>começar.</em>
-              </h2>
-              <p>Transparência também é uma ferramenta.</p>
-            </div>
-            <div className="faq-list">
-              {[
-                [
-                  "Preciso criar uma conta ou pagar?",
-                  "Não. O ILOVEKUSH não cobra por operação e não exige cadastro. A hospedagem tem limites de capacidade, tamanho e execução. Esses limites aparecem nas ferramentas quando se aplicam.",
-                ],
-                [
-                  "O que acontece com os meus arquivos?",
-                  "Nas ferramentas que processam neste dispositivo, seus documentos ficam no navegador. Nas operações de servidor, os arquivos são temporários e apagados ao concluir a resposta. Arquivos deixados por uma falha expiram após uma hora e são removidos na próxima operação.",
-                ],
-                [
-                  "É igual a todas as funções do iLovePDF?",
-                  "O projeto oferece ferramentas próprias para operações semelhantes. Resultados de conversão, assinaturas, IA e perfis PDF/A têm diferenças e limites descritos em cada ferramenta. O projeto é independente e não é afiliado ao iLovePDF.",
-                ],
-              ].map(([q, a], i) => (
-                <div
-                  key={q}
-                  className={openFaq === i ? "faq-item expanded" : "faq-item"}
+                <button
+                  className="primary"
+                  onClick={() => homePicker.current?.click()}
                 >
+                  Selecionar arquivos <Icon name="Plus" size={17} />
+                </button>
+                <input
+                  ref={homePicker}
+                  type="file"
+                  multiple
+                  accept=".pdf,image/*"
+                  hidden
+                  onChange={(event) => {
+                    openWithFiles([...(event.target.files || [])]);
+                    event.currentTarget.value = "";
+                  }}
+                />
+              </section>
+            </section>
+            <section
+              id="ferramentas"
+              className="tools-section"
+              aria-labelledby="tools-title"
+            >
+              <div className="section-heading">
+                <h2 id="tools-title">
+                  Ferramentas <span>{catalog.length}</span>
+                </h2>
+                <label className="search-box">
+                  <Icon name="Search" size={19} />
+                  <input
+                    aria-label="Buscar ferramenta"
+                    placeholder="O que você precisa fazer?"
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                  />
+                  {query && (
+                    <button
+                      onClick={() => setQuery("")}
+                      aria-label="Limpar busca"
+                    >
+                      <Icon name="X" size={17} />
+                    </button>
+                  )}
+                </label>
+              </div>
+              <div
+                className="category-bar"
+                role="group"
+                aria-label="Categorias"
+              >
+                {categories.map(([id, name]) => (
                   <button
-                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                    aria-expanded={openFaq === i}
+                    key={id}
+                    className={category === id ? "selected" : ""}
+                    aria-pressed={category === id}
+                    onClick={() => setCategory(id)}
                   >
-                    {q}
-                    <Icon name={openFaq === i ? "Minus" : "Plus"} size={18} />
+                    {id === "todos" ? "Todas" : name}
                   </button>
-                  {openFaq === i && <p>{a}</p>}
+                ))}
+              </div>
+              {favoritesOnly && (
+                <div className="filter-note">
+                  <Icon name="Bookmark" size={15} /> Exibindo seus favoritos{" "}
+                  <button onClick={() => setFavoritesOnly(false)}>
+                    Mostrar todas
+                  </button>
                 </div>
-              ))}
-            </div>
-          </section>
-        </main>
-      )}
+              )}
+              <div className="results-count" role="status" aria-live="polite">
+                {query || category !== "todos" || favoritesOnly
+                  ? `${visible.length} ${visible.length === 1 ? "ferramenta encontrada" : "ferramentas encontradas"}`
+                  : "Escolha uma ferramenta para começar."}
+              </div>
+              <div className="tools-grid">
+                {visible.map((item) => (
+                  <article className="tool-card" key={item.id}>
+                    <a
+                      href={`/ferramenta/${item.id}`}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        setInitialFiles([]);
+                        navigate(`/ferramenta/${item.id}`);
+                      }}
+                      className="tool-card-link"
+                    >
+                      <span className="tool-icon">
+                        <Icon name={item.icon} size={26} />
+                      </span>
+                      <h3>{item.name}</h3>
+                      <p>{item.description}</p>
+                      <Icon
+                        name="ArrowUpRight"
+                        size={16}
+                        className="card-arrow"
+                      />
+                    </a>
+                    <button
+                      className={`bookmark ${favorites.includes(item.id) ? "bookmarked" : ""}`}
+                      aria-label={`${favorites.includes(item.id) ? "Remover" : "Adicionar"} ${item.name} ${favorites.includes(item.id) ? "dos" : "aos"} favoritos`}
+                      aria-pressed={favorites.includes(item.id)}
+                      onClick={() => toggleFavorite(item.id)}
+                    >
+                      <Icon
+                        name="Bookmark"
+                        size={17}
+                        fill={
+                          favorites.includes(item.id) ? "currentColor" : "none"
+                        }
+                      />
+                    </button>
+                  </article>
+                ))}
+              </div>
+              {!visible.length && (
+                <div className="empty-search">
+                  <Icon
+                    name={favoritesOnly ? "Bookmark" : "SearchX"}
+                    size={34}
+                  />
+                  <h3>
+                    {favoritesOnly
+                      ? "Seus favoritos ficam aqui."
+                      : "Nenhuma ferramenta encontrada."}
+                  </h3>
+                  <p>
+                    {favoritesOnly
+                      ? "Use o marcador para guardar as ferramentas que mais usa."
+                      : "Tente outra busca ou escolha outra categoria."}
+                  </p>
+                  <button
+                    className="outline"
+                    onClick={() => {
+                      setQuery("");
+                      setCategory("todos");
+                      setFavoritesOnly(false);
+                    }}
+                  >
+                    Ver todas as ferramentas
+                  </button>
+                </div>
+              )}
+            </section>
+            <p className="home-note">
+              <Icon name="Info" size={16} /> O processamento e os limites de
+              cada operação aparecem dentro da ferramenta.
+            </p>
+          </main>
+        )}
+      </div>
       <footer className="footer">
-        <div className="container footer-top">
+        <div className="container footer-inner">
+          <a
+            href="https://kush-archives.com.br/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            © {new Date().getFullYear()} kush4rchives{" "}
+            <Icon name="ArrowUpRight" size={13} />
+          </a>
           <div>
-            <Brand onClick={() => navigate("/")} />
-            <p>Um pouco de leveza para os seus documentos.</p>
-          </div>
-          <div>
-            <button onClick={() => setModal("privacy")}>Privacidade</button>
-            <button onClick={() => setModal("about")}>Sobre o projeto</button>
+            <button onClick={() => setPrivacyOpen(true)}>Privacidade</button>
             <a
               href="https://github.com/gabrielbritto7/ilovekush"
               target="_blank"
               rel="noreferrer"
             >
-              Código aberto <Icon name="ArrowUpRight" size={14} />
+              Código aberto <Icon name="ArrowUpRight" size={13} />
             </a>
           </div>
         </div>
-        <div className="container footer-bottom">
-          <span>
-            © {new Date().getFullYear()} ILOVEKUSH. Feito para ser livre.
-          </span>
-          <span>
-            Independente. Aberto. Do seu jeito. <Icon name="Leaf" size={13} />
-          </span>
-        </div>
       </footer>
-      {modal && (
-        <div className="modal-backdrop" onClick={() => setModal("")}>
-          <section
-            className="info-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-label={modal === "privacy" ? "Privacidade" : "Sobre o projeto"}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              className="modal-close"
-              onClick={() => setModal("")}
-              aria-label="Fechar"
-            >
-              <Icon name="X" />
-            </button>
-            <span className="info-modal-icon">
-              <Icon
-                name={modal === "privacy" ? "ShieldCheck" : "Leaf"}
-                size={30}
-              />
-            </span>
-            <h2>
-              {modal === "privacy"
-                ? "Seus arquivos, com cuidado."
-                : "Conheça o ILOVEKUSH."}
-            </h2>
-            {modal === "privacy" ? (
-              <>
-                <p>
-                  Ferramentas com o indicador “Neste dispositivo” processam o
-                  arquivo no navegador. Nesses casos, nenhum documento é enviado
-                  ao nosso servidor.
-                </p>
-                <p>
-                  Operações de servidor usam uma pasta temporária por
-                  requisição. Os arquivos são apagados ao concluir o envio do
-                  resultado ou em caso de erro. Resíduos de uma interrupção são
-                  removidos na próxima operação depois de uma hora.
-                </p>
-                <p>
-                  Os favoritos ficam no armazenamento local do navegador. Não
-                  usamos anúncios, rastreadores ou contas. O provedor de
-                  hospedagem pode registrar dados técnicos de acesso, como
-                  endereço IP e erros.
-                </p>
-              </>
-            ) : (
-              <>
-                <p>
-                  O ILOVEKUSH é uma caixa de ferramentas de PDF independente,
-                  gratuita e de código aberto. Usa motores de processamento
-                  próprios e bibliotecas abertas.
-                </p>
-                <p>
-                  Conversões e recursos avançados têm limitações descritas nas
-                  ferramentas. A assinatura visual não substitui um certificado
-                  digital, e resumo extrativo não é IA generativa.
-                </p>
-                <p>
-                  Não somos afiliados ao iLovePDF. Consulte o README no GitHub
-                  para cobertura, licenças e implantação.
-                </p>
-                <a
-                  className="primary"
-                  href="https://github.com/gabrielbritto7/ilovekush"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Explorar o projeto <Icon name="Github" size={17} />
-                </a>
-              </>
-            )}
-          </section>
-        </div>
-      )}
+      {privacyOpen && <PrivacyDialog onClose={() => setPrivacyOpen(false)} />}
     </>
+  );
+}
+
+function PrivacyDialog({ onClose }: { onClose: () => void }) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const element = dialog.current;
+    element?.showModal();
+    return () => element?.close();
+  }, []);
+  return (
+    <dialog
+      ref={dialog}
+      className="info-modal"
+      aria-labelledby="dialog-title"
+      onCancel={onClose}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <div className="modal-content">
+        <button className="modal-close" onClick={onClose} aria-label="Fechar">
+          <Icon name="X" />
+        </button>
+        <Icon name="ShieldCheck" size={28} />
+        <h2 id="dialog-title">Privacidade</h2>
+        <p>
+          Ferramentas com o indicador “Neste dispositivo” processam o arquivo no
+          navegador. Nesses casos, nenhum documento é enviado ao nosso servidor.
+        </p>
+        <p>
+          Operações de servidor usam uma pasta temporária por requisição. Os
+          arquivos são apagados ao concluir o envio do resultado ou em caso de
+          erro. Resíduos de uma interrupção são removidos na próxima operação
+          depois de uma hora.
+        </p>
+        <p>
+          Os favoritos ficam no armazenamento local do navegador. Não usamos
+          anúncios, rastreadores ou contas. O provedor de hospedagem pode
+          registrar dados técnicos de acesso, como endereço IP e erros.
+        </p>
+      </div>
+    </dialog>
   );
 }
 
@@ -803,7 +569,7 @@ function SignaturePad({ onChange }: { onChange: (file: File | null) => void }) {
           drawing.current = true;
           e.currentTarget.setPointerCapture(e.pointerId);
           const ctx = e.currentTarget.getContext("2d")!;
-          ctx.strokeStyle = "#173c31";
+          ctx.strokeStyle = "#1a1a1a";
           ctx.lineWidth = 4;
           ctx.lineCap = "round";
           ctx.beginPath();
